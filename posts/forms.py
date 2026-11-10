@@ -10,27 +10,29 @@ class PostForm(forms.ModelForm):
 
     class Meta:
         model = Post
-        fields = ("title", "content", "image")
+        fields = ("titulo", "contenido", "estado", "image")
         widgets = {
-            "title": forms.TextInput(
+            "titulo": forms.TextInput(
                 attrs={
                     "class": "form-control",
                     "placeholder": "Escribe un título descriptivo",
                     "autofocus": True,
                 }
             ),
-            "content": forms.Textarea(
+            "contenido": forms.Textarea(
                 attrs={
                     "class": "form-control",
                     "rows": 10,
                     "placeholder": "Comparte el contenido de tu publicación...",
                 }
             ),
+            "estado": forms.Select(attrs={"class": "form-select"}),
             "image": forms.ClearableFileInput(attrs={"class": "form-control"}),
         }
         labels = {
-            "title": "Título",
-            "content": "Contenido",
+            "titulo": "Título",
+            "contenido": "Contenido",
+            "estado": "Estado",
             "image": "Imagen (opcional)",
         }
 

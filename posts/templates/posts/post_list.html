@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
 {% block title %}Publicaciones · Blog Django{% endblock %}
 
@@ -54,24 +54,24 @@
                 <article class="card h-100 shadow-sm post-card">
                     {% if post.image %}
                         <img src="{{ post.image.url }}" class="card-img-top post-card-image"
-                             alt="Imagen de {{ post.title }}" loading="lazy">
+                             alt="Imagen de {{ post.titulo }}" loading="lazy">
                     {% else %}
                         <div class="card-img-top post-card-placeholder d-flex align-items-center justify-content-center">
                             <span>Sin imagen</span>
                         </div>
                     {% endif %}
                     <div class="card-body d-flex flex-column">
-                        <h3 class="h5 card-title mb-2">{{ post.title }}</h3>
+                        <h3 class="h5 card-title mb-2">{{ post.titulo }}</h3>
                         <p class="text-secondary small mb-2">
-                            Por <strong>{{ post.author.username }}</strong>
-                            · {{ post.created_at|date:"d M Y" }}
+                            Por <strong>{{ post.autor.username }}</strong>
+                            · {{ post.fecha_creacion|date:"d M Y" }}
                         </p>
                         <p class="card-text text-secondary flex-grow-1">
-                            {{ post.content|truncatewords:24 }}
+                            {{ post.contenido|truncatewords:24 }}
                         </p>
                         <div class="d-flex flex-wrap gap-2 mt-3">
                             <a href="{{ post.get_absolute_url }}" class="btn btn-sm btn-primary">Leer más</a>
-                            {% if user.is_authenticated and user == post.author or user.is_staff %}
+                            {% if user.is_authenticated and user == post.autor or user.is_staff %}
                                 <a href="{% url 'posts:post_update' post.pk %}" class="btn btn-sm btn-outline-secondary">Editar</a>
                                 <a href="{% url 'posts:post_delete' post.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
                             {% endif %}

@@ -1,10 +1,10 @@
-# Preentrega 8 – Blog Django
+# Preentrega 9 – Blog Django
 
 ## Descripción
 
 Blog web desarrollado con Django como parte del proyecto final del curso de Python Coderhouse. La aplicación permite a las personas registrarse, iniciar sesión y publicar contenido con texto e imágenes opcionales.
 
-Incluye un listado público de publicaciones, búsqueda por título y contenido, y gestión completa de cada publicación por parte de su autor o del personal del sitio.
+Incluye un listado público de publicaciones, búsqueda por título y contenido, y gestión completa de cada publicación por parte de su autor o del personal del sitio. Cada publicación tiene un estado (**Borrador**, **Publicado** o **Archivado**) y el listado público solo muestra las publicaciones publicadas.
 
 ## Tecnologías
 
@@ -19,8 +19,12 @@ Incluye un listado público de publicaciones, búsqueda por título y contenido,
 
 ## Funcionalidades
 
+- Modelo `Post` con los campos `titulo`, `contenido`, `autor`, `fecha_creacion` y `estado`.
+- Fecha de creación automática mediante `auto_now_add=True`.
+- Estados definidos con `choices`: Borrador, Publicado y Archivado.
+- Listado público que consulta mediante el ORM únicamente las publicaciones en estado Publicado.
+- Vista de detalle de cada publicación; los borradores y archivados solo son visibles para su autor o el staff.
 - Listado público de publicaciones con paginación.
-- Vista de detalle de cada publicación.
 - Creación, edición y eliminación de publicaciones.
 - Carga opcional de imágenes para las publicaciones.
 - Publicaciones sin imagen con visualización controlada.
@@ -31,9 +35,37 @@ Incluye un listado público de publicaciones, búsqueda por título y contenido,
 - Búsqueda por título y contenido con `Q` e `icontains`.
 - Mensaje cuando la búsqueda no encuentra coincidencias.
 - Navegación y acciones que cambian según el usuario autenticado.
-- Panel de administración con el modelo `Post` registrado.
+- Panel de administración con `PostAdmin` (`admin.ModelAdmin`): listado, filtros, búsqueda y edición del estado.
 - Interfaz responsiva con Bootstrap 5 y estilos propios.
 - Mensajes de confirmación y error.
+
+## Modelo `Post`
+
+| Campo | Tipo | Detalle |
+|---|---|---|
+| `titulo` | `CharField(max_length=200)` | Título de la publicación |
+| `contenido` | `TextField` | Contenido completo |
+| `autor` | `ForeignKey` a `User` | Autor de la publicación (`related_name="posts"`) |
+| `fecha_creacion` | `DateTimeField` | Se completa automáticamente con `auto_now_add=True` |
+| `estado` | `CharField` con `choices` | Borrador, Publicado o Archivado |
+| `image` | `ImageField` | Imagen opcional |
+| `updated_at` | `DateTimeField` | Se actualiza automáticamente con `auto_now=True` |
+
+- El estado por defecto de una publicación nueva es **Borrador**.
+- El método `__str__` retorna el título de la publicación.
+- Las publicaciones se ordenan por fecha de creación descendente.
+
+## Administración
+
+El modelo está registrado en Django Admin mediante `PostAdmin`, que hereda de `admin.ModelAdmin` e incluye:
+
+- Columnas de título, autor, estado, imagen y fechas.
+- Filtros por estado, fecha de creación y autor.
+- Búsqueda por título, contenido y nombre de usuario del autor.
+- Edición rápida del estado desde el listado.
+- Campos de fecha de creación y actualización como solo lectura.
+
+Para acceder al panel se debe crear un superusuario y abrir `http://127.0.0.1:8000/admin/`.
 
 ## Requisitos previos
 
@@ -60,7 +92,8 @@ blog_django/
 │   ├── apps.py
 │   ├── forms.py
 │   ├── migrations/
-│   │   └── 0001_initial.py
+│   │   ├── 0001_initial.py
+│   │   └── 0002_post_estado_renombres.py
 │   ├── models.py
 │   ├── templates/posts/
 │   ├── tests.py
@@ -153,6 +186,8 @@ Aplicar las migraciones de Django y de la aplicación `posts`:
 python manage.py migrate
 ```
 
+La migración `0001_initial` crea el modelo inicial y `0002_post_estado_renombres` adapta los campos a `titulo`, `contenido`, `autor` y `fecha_creacion`, y agrega el campo `estado` sin eliminar los datos existentes.
+
 Comprobar que no existan cambios de modelo pendientes:
 
 ```bash
@@ -193,15 +228,15 @@ python manage.py check
 python manage.py test
 ```
 
-Las pruebas cubren modelos, listado, detalle, búsqueda, creación, edición, eliminación, permisos de autoría, autenticación, imágenes y publicaciones sin imagen.
+Las pruebas cubren el modelo, los estados de publicación, el listado, el detalle, la búsqueda, la creación, la edición, la eliminación, los permisos de autoría, la autenticación, las imágenes y las publicaciones sin imagen.
 
 ## Rutas principales
 
 | Ruta | Descripción |
 |---|---|
-| `/` | Listado de publicaciones |
+| `/` | Listado de publicaciones publicadas |
 | `/posts/new/` | Crear publicación (requiere login) |
-| `/posts/<id>/` | Detalle de publicación |
+| `/posts/<id>/` | Detalle de publicación (publicadas o propias/staff) |
 | `/posts/<id>/edit/` | Editar publicación (autor o staff) |
 | `/posts/<id>/delete/` | Eliminar publicación (autor o staff) |
 | `/accounts/register/` | Registro de usuario |

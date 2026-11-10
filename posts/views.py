@@ -26,7 +26,9 @@ class PostListView(ListView):
     paginate_by = 6
 
     def get_queryset(self):
-        queryset = Post.objects.select_related("author")
+        queryset = Post.objects.select_related("autor").filter(
+            estado=Post.Estado.PUBLICADO
+        )
         self.search_form = SearchForm(self.request.GET or None)
         self.query = ""
 
@@ -34,7 +36,8 @@ class PostListView(ListView):
             self.query = self.search_form.cleaned_data.get("q", "").strip()
             if self.query:
                 queryset = queryset.filter(
-                    Q(title__icontains=self.query) | Q(content__icontains=self.query)
+                    Q(titulo__icontains=self.query)
+                    | Q(contenido__icontains=self.query)
                 )
 
         return queryset
@@ -47,12 +50,25 @@ class PostListView(ListView):
 
 
 class PostDetailView(DetailView):
-    """Detalle público de una publicación."""
+    """Detalle de una publicación visible para el público o su autor/staff."""
 
     model = Post
     template_name = "posts/post_detail.html"
     context_object_name = "post"
-    queryset = Post.objects.select_related("author")
+    queryset = Post.objects.select_related("autor")
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+
+        if user.is_authenticated:
+            if user.is_staff:
+                return queryset
+            return queryset.filter(
+                Q(estado=Post.Estado.PUBLICADO) | Q(autor=user)
+            )
+
+        return queryset.filter(estado=Post.Estado.PUBLICADO)
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):
@@ -63,7 +79,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     template_name = "posts/post_form.html"
 
     def form_valid(self, form):
-        form.instance.author = self.request.user
+        form.instance.autor = self.request.user
         response = super().form_valid(form)
         messages.success(self.request, "La publicación se creó correctamente.")
         return response

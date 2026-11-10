@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
 {% block title %}Eliminar publicación · Blog Django{% endblock %}
 
@@ -11,9 +11,9 @@
                 <p class="mb-3">¿Seguro que quieres eliminar esta publicación?</p>
 
                 <div class="alert alert-warning">
-                    <strong>{{ post.title }}</strong>
+                    <strong>{{ post.titulo }}</strong>
                     <div class="small mt-1">
-                        Por {{ post.author.username }} · {{ post.created_at|date:"d M Y, H:i" }}
+                        Por {{ post.autor.username }} · {{ post.fecha_creacion|date:"d M Y, H:i" }}
                     </div>
                 </div>
 
